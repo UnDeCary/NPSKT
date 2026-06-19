@@ -1,0 +1,17 @@
+.env
+.venv/
+.venv-win/
+.pip-cache/
+.npm-cache/
+__pycache__/
+*.pyc
+*.db
+.pytest_cache/
+node_modules/
+dist/
+.vite/
+coverage/
+*.log
+*.pid
+.superpowers/
+.worktrees/
