@@ -1,9 +1,28 @@
 import { AlertTriangle, Frown, Meh, Smile, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { Kpi } from '../types';
 import { NpsGauge } from './NpsGauge';
 
 function formatInt(value: number) {
   return new Intl.NumberFormat('ru-RU').format(value);
+}
+
+const KPI_ROUTES: Record<string, string> = {
+  b2c: '/b2c',
+  b2b: '/b2b',
+  'b2c-internet': '/products/b2c-internet',
+  'b2c-tv': '/products/b2c-tv',
+  'b2c-fms': '/products/b2c-fms',
+  'b2b-internet': '/b2b/products/internet',
+  'b2b-ict': '/b2b/products/ict-hosting',
+  'b2b-video': '/b2b/products/cloud-video'
+};
+
+function formatPeriodShort(period?: string) {
+  if (!period) return 'Прошлый период';
+  const halfYear = period.match(/^(I|II)\s+полугодие\s+(\d{4})$/);
+  if (halfYear) return `${halfYear[1] === 'I' ? 'H1' : 'H2'} ${halfYear[2].slice(-2)}`;
+  return period.replace(/\s+год$/, '');
 }
 
 function ScoreBreakdown({ kpi }: { kpi: Kpi }) {
@@ -53,7 +72,32 @@ function PlanProgress({ kpi }: { kpi: Kpi }) {
   );
 }
 
-export function KpiCard({ kpi, large = false }: { kpi: Kpi; large?: boolean }) {
+function NpsDelta({ kpi, previousNps, previousPeriod }: { kpi: Kpi; previousNps?: number; previousPeriod?: string }) {
+  if (previousNps === undefined) return null;
+  const delta = kpi.nps - previousNps;
+  const direction = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
+  return (
+    <div className={`nps-delta ${direction}`}>
+      <span>{formatPeriodShort(previousPeriod)}</span>
+      <strong>{previousNps}%</strong>
+      <b>{delta > 0 ? '▲' : delta < 0 ? '▼' : '●'} {Math.abs(delta)} п.п.</b>
+    </div>
+  );
+}
+
+export function KpiCard({
+  kpi,
+  large = false,
+  previousNps,
+  previousPeriod
+}: {
+  kpi: Kpi;
+  large?: boolean;
+  previousNps?: number;
+  previousPeriod?: string;
+}) {
+  const route = KPI_ROUTES[kpi.key];
+  const gauge = <NpsGauge value={kpi.nps} small={!large} />;
   return (
     <article className={`kpi-card ${large ? 'large' : 'compact'}`}>
       <div className="kpi-title-row">
@@ -66,8 +110,13 @@ export function KpiCard({ kpi, large = false }: { kpi: Kpi; large?: boolean }) {
       </div>
 
       <div className="kpi-body">
-        <NpsGauge value={kpi.nps} small={!large} />
+        {route ? (
+          <Link className="gauge-link" to={route} aria-label={`Открыть раздел ${kpi.label}`}>
+            {gauge}
+          </Link>
+        ) : gauge}
         <ScoreBreakdown kpi={kpi} />
+        {!large && <NpsDelta kpi={kpi} previousNps={previousNps} previousPeriod={previousPeriod} />}
         {!large && <PlanProgress kpi={kpi} />}
       </div>
 
@@ -78,11 +127,7 @@ export function KpiCard({ kpi, large = false }: { kpi: Kpi; large?: boolean }) {
             <span>Выборка (n)</span>
             <strong>{formatInt(kpi.n)}</strong>
           </div>
-          <div className="wave-delta">
-            <span>II полугодие 2026:</span>
-            <strong>{Math.max(0, kpi.nps - 5)}</strong>
-            <b>▲ 5</b>
-          </div>
+          <NpsDelta kpi={kpi} previousNps={previousNps} previousPeriod={previousPeriod} />
         </div>
       ) : null}
     </article>

@@ -19,6 +19,10 @@ export function DashboardPage({ apiPath }: { apiPath: string }) {
   if (isLoading) return <div className="state-panel">Загрузка dashboard...</div>;
   if (error || !data) return <div className="state-panel error">Не удалось загрузить страницу</div>;
 
+  const currentPeriodIndex = data.trend.findIndex((point) => point.period === data.wave);
+  const previousPoint = data.trend[(currentPeriodIndex >= 0 ? currentPeriodIndex : data.trend.length) - 1];
+  const previousNps = (key: string) => previousPoint?.values[key];
+
   return (
     <div className={`page ${isHome ? 'home-page' : 'product-page'}`}>
       <div className="page-heading">
@@ -43,10 +47,20 @@ export function DashboardPage({ apiPath }: { apiPath: string }) {
       </div>
 
       <section className={`kpi-grid comparison-count-${data.comparisons.length}`}>
-        <KpiCard kpi={data.primary} large />
+        <KpiCard
+          kpi={data.primary}
+          large
+          previousNps={previousNps(data.primary.key)}
+          previousPeriod={previousPoint?.period}
+        />
         <div className="comparison-grid">
           {data.comparisons.map((kpi) => (
-            <KpiCard key={kpi.key} kpi={kpi} />
+            <KpiCard
+              key={kpi.key}
+              kpi={kpi}
+              previousNps={previousNps(kpi.key)}
+              previousPeriod={previousPoint?.period}
+            />
           ))}
         </div>
       </section>

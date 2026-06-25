@@ -27,8 +27,10 @@ function arcPath(startAngle: number, endAngle: number) {
 
 export function NpsGauge({ value, small }: { value: number; small?: boolean }) {
   const angle = npsToGaugeAngle(value);
+  const isNegative = value < 0;
+  const isExtreme = Math.abs(value) >= 100;
   return (
-    <div className={`gauge ${small ? 'small' : ''}`} aria-label={`NPS ${value}`}>
+    <div className={`gauge ${small ? 'small' : ''} ${isNegative ? 'negative' : ''} ${isExtreme ? 'extreme' : ''}`} aria-label={`NPS ${value}%`}>
       <svg className="gauge-track" viewBox="0 0 200 145" aria-hidden="true">
         <path className="gauge-segment gauge-red" d={arcPath(-120, -4)} />
         <path className="gauge-segment gauge-amber" d={arcPath(2, 58)} />
@@ -38,7 +40,11 @@ export function NpsGauge({ value, small }: { value: number; small?: boolean }) {
           <circle cx="100" cy="96" r="4.5" />
         </g>
       </svg>
-      <strong>{value}</strong>
+      <strong>
+        {isNegative ? <small className="nps-minus">−</small> : null}
+        {Math.abs(value)}
+        <small className="nps-percent">%</small>
+      </strong>
       <span>NPS</span>
       <em className="min-label">-100</em>
       <em className="max-label">100</em>

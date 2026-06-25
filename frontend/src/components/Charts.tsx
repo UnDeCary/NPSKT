@@ -1,8 +1,9 @@
+import { useEffect, useState } from 'react';
 import {
   Bar,
   BarChart,
   CartesianGrid,
-  Legend,
+  LabelList,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -32,11 +33,20 @@ export function formatPercent(value: number | string) {
   return `${Number(numeric.toFixed(2))}%`;
 }
 
+export function formatBarPercent(value: number | string) {
+  const numeric = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(numeric) && numeric > 0 ? formatPercent(numeric) : '';
+}
+
+export function scoreTooltipOrder(item: { dataKey?: string | number }) {
+  const order: Record<string, number> = { promoters: 0, neutrals: 1, detractors: 2 };
+  return order[String(item.dataKey)] ?? 99;
+}
+
 function splitPeriod(value: string) {
-  const normalized = value
-    .replace(' год', '')
-    .replace('I полугодие', 'I полуг.')
-    .replace('II полугодие', 'II полуг.');
+  const halfYear = value.match(/^(I|II)\s+полугодие\s+(\d{4})$/);
+  if (halfYear) return [`${halfYear[1] === 'I' ? 'H1' : 'H2'} ${halfYear[2].slice(-2)}`];
+  const normalized = value.replace(' год', '');
   if (normalized.includes('\n')) return normalized.split('\n');
   const match = normalized.match(/^(\d{4})\s+(.*)$/);
   return match ? [match[1], match[2]] : [normalized];
@@ -52,6 +62,14 @@ function PeriodTick({ x = 0, y = 0, payload }: TickProps) {
         </text>
       ))}
     </g>
+  );
+}
+
+function NpsLineLabel({ x = 0, y = 0, value = 0, color }: { x?: number; y?: number; value?: number; color: string }) {
+  return (
+    <text x={x} y={y - 8} textAnchor="middle" fill={value < 0 ? '#ef2d24' : color} fontSize={11} fontWeight={800}>
+      {value}%
+    </text>
   );
 }
 
@@ -71,29 +89,55 @@ export function TrendChart({ data, periodicity, onPeriodicity }: { data: Dashboa
   const rows = data.trend.map((point) => ({ period: point.period, ...point.values }));
   const keys = [data.primary.key, ...data.comparisons.map((item) => item.key)];
   const labels = new Map([[data.primary.key, data.primary.label], ...data.comparisons.map((item) => [item.key, item.label] as const)]);
+  const [visibleKeys, setVisibleKeys] = useState(() => new Set(keys));
+  useEffect(() => setVisibleKeys(new Set(keys)), [data.primary.key, data.comparisons.map((item) => item.key).join('|')]);
+
+  const toggleKey = (key: string) => {
+    setVisibleKeys((current) => {
+      const next = new Set(current);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
   return (
     <section className="panel chart-panel trend-panel">
       <div className="panel-heading">
         <h2>Динамика NPS</h2>
         <PeriodicitySelect periodicity={periodicity} onPeriodicity={onPeriodicity} />
       </div>
-      <ResponsiveContainer width="100%" height={208}>
+      <div className="trend-legend" aria-label="Отображаемые линии графика">
+        {keys.map((key, index) => (
+          <button
+            type="button"
+            key={key}
+            className={visibleKeys.has(key) ? 'active' : ''}
+            aria-pressed={visibleKeys.has(key)}
+            onClick={() => toggleKey(key)}
+          >
+            <i style={{ backgroundColor: palette[index % palette.length] }} />
+            <span>{labels.get(key)}</span>
+          </button>
+        ))}
+      </div>
+      <ResponsiveContainer width="100%" height={220}>
         <LineChart data={rows} margin={{ top: 18, right: 24, left: 0, bottom: 28 }}>
           <CartesianGrid stroke="#e9eef5" vertical={false} />
           <XAxis dataKey="period" tick={<PeriodTick />} interval={0} height={42} tickMargin={13} padding={{ left: 26, right: 26 }} />
           <YAxis domain={[-110, 110]} ticks={[-100, 0, 100]} tick={{ fontSize: 11, fill: '#06164a', fontWeight: 700 }} />
-          <Tooltip />
-          <Legend iconType="circle" wrapperStyle={{ fontSize: 12, fontWeight: 700, paddingBottom: 8 }} verticalAlign="top" />
+          <Tooltip formatter={(value) => `${value}%`} />
           {keys.map((key, index) => (
             <Line
               key={key}
+              hide={!visibleKeys.has(key)}
               type="monotone"
               dataKey={key}
               name={labels.get(key)}
               stroke={palette[index % palette.length]}
               strokeWidth={2}
               dot={{ r: 3, strokeWidth: 1 }}
-              label={{ position: 'top', fontSize: 11, fill: palette[index % palette.length], fontWeight: 800 }}
+              label={<NpsLineLabel color={palette[index % palette.length]} />}
             />
           ))}
         </LineChart>
@@ -119,16 +163,22 @@ export function StructureChart({ data, periodicity, onPeriodicity }: { data: Das
                 <CartesianGrid stroke="#eef3f7" vertical={false} />
                 <XAxis dataKey="period" tick={<PeriodTick />} interval={0} height={42} tickMargin={12} />
                 <YAxis domain={[0, 100]} tickFormatter={formatPercent} tick={{ fontSize: 10, fill: '#06164a', fontWeight: 700 }} ticks={[0, 50, 100]} />
-                <Tooltip formatter={(value) => formatPercent(value as number)} />
-                <Bar dataKey="promoters" stackId={STRUCTURE_STACK_ID} name="Промоутеры (9-10)" fill="#159447" label={{ position: 'center', fill: '#fff', fontSize: 9, fontWeight: 800, formatter: formatPercent }} />
-                <Bar dataKey="neutrals" stackId={STRUCTURE_STACK_ID} name="Нейтралы (7-8)" fill="#f0b10a" label={{ position: 'center', fill: '#06164a', fontSize: 9, fontWeight: 800, formatter: formatPercent }} />
-                <Bar dataKey="detractors" stackId={STRUCTURE_STACK_ID} name="Детракторы (0-6)" fill="#ef2d24" label={{ position: 'center', fill: '#fff', fontSize: 9, fontWeight: 800, formatter: formatPercent }} />
+                <Tooltip formatter={(value) => formatPercent(value as number)} itemSorter={scoreTooltipOrder} />
+                <Bar dataKey="detractors" stackId={STRUCTURE_STACK_ID} name="Детракторы (0-6)" fill="#ef2d24">
+                  <LabelList dataKey="detractors" position="center" fill="#fff" fontSize={9} fontWeight={800} formatter={formatBarPercent} />
+                </Bar>
+                <Bar dataKey="neutrals" stackId={STRUCTURE_STACK_ID} name="Нейтралы (7-8)" fill="#f0b10a">
+                  <LabelList dataKey="neutrals" position="center" fill="#06164a" fontSize={9} fontWeight={800} formatter={formatBarPercent} />
+                </Bar>
+                <Bar dataKey="promoters" stackId={STRUCTURE_STACK_ID} name="Промоутеры (9-10)" fill="#159447">
+                  <LabelList dataKey="promoters" position="center" fill="#fff" fontSize={9} fontWeight={800} formatter={formatBarPercent} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
             <div className="mini-legend">
-              <span><i className="green-bg" />Промоутеры (9-10)</span>
-              <span><i className="amber-bg" />Нейтралы (7-8)</span>
               <span><i className="red-bg" />Детракторы (0-6)</span>
+              <span><i className="amber-bg" />Нейтралы (7-8)</span>
+              <span><i className="green-bg" />Промоутеры (9-10)</span>
             </div>
           </div>
         ))}
