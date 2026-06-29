@@ -1,4 +1,16 @@
-import type { DashboardResponse, RegionsDashboardResponse, User, Wave } from './types';
+import type {
+  DashboardResponse,
+  DictionaryItem,
+  MinimumBaseInput,
+  MinimumBaseSetting,
+  PlanSetting,
+  PlanSettingInput,
+  RegionsDashboardResponse,
+  User,
+  UserCreate,
+  UserUpdate,
+  Wave
+} from './types';
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? (import.meta.env.DEV ? 'http://127.0.0.1:8000' : '');
 
@@ -104,10 +116,19 @@ export const api = {
     return request<Record<string, unknown>>(`/api/uploads/${kind}/commit`, { method: 'POST', body });
   },
   uploadHistory: () => request<Array<Record<string, string | number>>>('/api/uploads/history'),
-  dictionary: (type: string) => request<Array<Record<string, string | number | boolean | null>>>(`/api/admin/dictionaries/${type}`),
-  plans: () => request<Array<Record<string, string | number | null>>>('/api/admin/plans'),
-  minimumBases: () => request<Array<Record<string, string | number>>>('/api/admin/minimum-bases'),
+  dictionary: (type: string) => request<DictionaryItem[]>(`/api/admin/dictionaries/${type}`),
+  plans: () => request<PlanSetting[]>('/api/admin/plans'),
+  createPlan: (payload: PlanSettingInput) => request<PlanSetting>('/api/admin/plans', { method: 'POST', body: JSON.stringify(payload) }),
+  updatePlan: (id: number, payload: PlanSettingInput) => request<PlanSetting>(`/api/admin/plans/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  deletePlan: (id: number) => request<{ status: string }>(`/api/admin/plans/${id}`, { method: 'DELETE' }),
+  minimumBases: () => request<MinimumBaseSetting[]>('/api/admin/minimum-bases'),
+  createMinimumBase: (payload: MinimumBaseInput) => request<MinimumBaseSetting>('/api/admin/minimum-bases', { method: 'POST', body: JSON.stringify(payload) }),
+  updateMinimumBase: (id: number, payload: MinimumBaseInput) => request<MinimumBaseSetting>(`/api/admin/minimum-bases/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  deleteMinimumBase: (id: number) => request<{ status: string }>(`/api/admin/minimum-bases/${id}`, { method: 'DELETE' }),
   users: () => request<User[]>('/api/admin/users'),
+  createUser: (payload: UserCreate) => request<User>('/api/admin/users', { method: 'POST', body: JSON.stringify(payload) }),
+  updateUser: (id: number, payload: UserUpdate) => request<User>(`/api/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  deleteUser: (id: number) => request<{ status: string }>(`/api/admin/users/${id}`, { method: 'DELETE' }),
   exportPdf: async (scope: 'current' | 'all') => {
     const blob = await requestBlob(`/api/exports/pdf/${scope}`, { method: 'POST' });
     const url = URL.createObjectURL(blob);

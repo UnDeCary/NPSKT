@@ -7,6 +7,37 @@ export type User = {
   is_active: boolean;
 };
 
+export type UserCreate = Omit<User, 'id'> & { password: string };
+export type UserUpdate = Partial<Omit<User, 'id' | 'login'>> & { password?: string };
+
+export type PlanSetting = {
+  id: number;
+  segment: string;
+  product: string;
+  company: string | null;
+  technology: string | null;
+  wave: string;
+  target: number;
+};
+
+export type PlanSettingInput = Omit<PlanSetting, 'id'>;
+
+export type MinimumBaseSetting = {
+  id: number;
+  scope_key: string;
+  minimum_n: number;
+};
+
+export type MinimumBaseInput = Omit<MinimumBaseSetting, 'id'>;
+
+export type DictionaryItem = {
+  id: number;
+  type: string;
+  value: string;
+  parent: string | null;
+  is_active: boolean;
+};
+
 export type Kpi = {
   key: string;
   label: string;

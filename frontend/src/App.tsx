@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardLayout } from './layout/DashboardLayout';
@@ -6,10 +7,16 @@ import { FieldControlPage } from './pages/FieldControlPage';
 import { UploadsPage } from './pages/UploadsPage';
 import { AdminTablesPage } from './pages/AdminTablesPage';
 import { RegionsPage } from './pages/RegionsPage';
-import { getToken } from './api';
+import { api, getToken } from './api';
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   return getToken() ? children : <Navigate to="/login" replace />;
+}
+
+function RequireAdmin({ children }: { children: JSX.Element }) {
+  const { data: user, isLoading } = useQuery({ queryKey: ['me'], queryFn: api.me, retry: false });
+  if (isLoading) return <div className="state-panel">Проверка прав доступа...</div>;
+  return user?.role === 'admin' ? children : <Navigate to="/" replace />;
 }
 
 export function App() {
@@ -36,7 +43,7 @@ export function App() {
         <Route path="regions" element={<RegionsPage />} />
         <Route path="field-control" element={<FieldControlPage />} />
         <Route path="admin/uploads" element={<UploadsPage />} />
-        <Route path="admin/settings" element={<AdminTablesPage />} />
+        <Route path="admin/settings" element={<RequireAdmin><AdminTablesPage /></RequireAdmin>} />
       </Route>
     </Routes>
   );

@@ -1,5 +1,7 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class TokenResponse(BaseModel):
@@ -28,19 +30,19 @@ class UserRead(BaseModel):
 
 
 class UserCreate(BaseModel):
-    login: str
-    email: str
+    login: str = Field(min_length=3, max_length=120)
+    email: str = Field(min_length=3, max_length=255)
     full_name: str = ""
-    password: str
-    role: str = "viewer"
+    password: str = Field(min_length=8, max_length=128)
+    role: Literal["admin", "viewer"] = "viewer"
     is_active: bool = True
 
 
 class UserUpdate(BaseModel):
     email: str | None = None
     full_name: str | None = None
-    password: str | None = None
-    role: str | None = None
+    password: str | None = Field(default=None, min_length=8, max_length=128)
+    role: Literal["admin", "viewer"] | None = None
     is_active: bool | None = None
 
 
@@ -78,7 +80,7 @@ class PlanCreate(BaseModel):
     company: str | None = None
     technology: str | None = None
     wave: str
-    target: int
+    target: int = Field(ge=0)
 
 
 class MinimumBaseRead(BaseModel):
@@ -91,7 +93,7 @@ class MinimumBaseRead(BaseModel):
 
 class MinimumBaseCreate(BaseModel):
     scope_key: str
-    minimum_n: int
+    minimum_n: int = Field(ge=1)
 
 
 class UploadHistoryRead(BaseModel):

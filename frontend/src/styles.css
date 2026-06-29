@@ -2264,6 +2264,177 @@ input {
 .secondary-button { background: #e8eef4; color: var(--ink); }
 .link-button { border: 0; background: transparent; color: var(--blue); cursor: pointer; padding: 6px 0; text-align: left; }
 
+.admin-settings-page { max-width: 1440px; }
+
+.admin-access-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border-radius: 999px;
+  background: #eef3fb;
+  color: #344574;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.settings-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #edf2f8;
+}
+
+.settings-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #53618a;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.settings-tabs button.active {
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 3px 10px rgba(9, 31, 71, .09);
+}
+
+.settings-stack { display: grid; gap: 14px; }
+.settings-message { padding: 11px 14px; border-radius: 7px; font-size: 12px; font-weight: 800; }
+.settings-message.success { background: #eaf8f1; color: #08763c; border: 1px solid #bde8d1; }
+.settings-message.error { background: #fff0ef; color: #b51f19; border: 1px solid #f5c6c3; }
+.settings-section { padding: 18px; }
+
+.settings-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.settings-section-heading h2 { margin: 0 0 4px; }
+.settings-section-heading p { margin: 0; color: #647197; font-size: 12px; }
+.settings-section-heading > svg { color: var(--blue); }
+
+.settings-form {
+  display: grid;
+  gap: 12px;
+  align-items: end;
+  padding: 14px;
+  border: 1px solid #dfe7f2;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.settings-form label {
+  display: grid;
+  gap: 6px;
+  color: #344574;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.settings-form input,
+.settings-form select { width: 100%; min-height: 38px; }
+.settings-form button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.user-create-form { grid-template-columns: repeat(5, minmax(130px, 1fr)) auto; }
+.plan-form { grid-template-columns: repeat(3, minmax(160px, 1fr)); }
+.minimum-form { grid-template-columns: minmax(260px, 1fr) minmax(130px, .35fr) auto; }
+.form-actions { display: flex; gap: 8px; align-items: center; }
+
+.password-panel {
+  display: grid;
+  grid-template-columns: minmax(230px, .7fr) minmax(420px, 1.3fr);
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border-color: #b9cdec;
+  background: #f6f9ff;
+}
+
+.password-panel > div,
+.password-panel form { display: flex; align-items: center; gap: 10px; }
+.password-panel > div { color: var(--ink); font-size: 12px; }
+.password-panel > div svg { color: var(--blue); }
+.password-panel input { flex: 1; }
+
+.admin-user-list { display: grid; gap: 8px; }
+.admin-user-row {
+  display: grid;
+  grid-template-columns: 38px minmax(220px, 1fr) 120px 112px auto;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.admin-user-row.blocked { background: #f7f8fa; opacity: .72; }
+.user-avatar { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: #e8effc; color: var(--blue); font-weight: 900; }
+.user-identity { display: grid; gap: 3px; min-width: 0; }
+.user-identity strong { color: var(--ink); font-size: 12px; }
+.user-identity span { overflow: hidden; color: #647197; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.role-badge,
+.status-badge { justify-self: start; padding: 5px 8px; border-radius: 999px; font-size: 10px; font-weight: 800; }
+.role-badge.admin { background: #e8edff; color: #253baf; }
+.role-badge.viewer { background: #eef2f6; color: #53618a; }
+.status-badge.active { background: #e7f7ef; color: #08763c; }
+.status-badge.blocked { background: #fff0ef; color: #c42620; }
+
+.row-actions { display: flex; justify-content: flex-end; gap: 6px; }
+.row-actions button {
+  min-height: 32px;
+  padding: 0 9px;
+  border: 1px solid #dbe4f0;
+  border-radius: 6px;
+  background: #f8fbff;
+  color: #344574;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.row-actions button:hover { border-color: #aebed5; background: #fff; }
+.row-actions button.danger { color: #d02b24; }
+.row-actions button:disabled { opacity: .3; cursor: not-allowed; }
+
+.settings-table-wrap { margin-top: 14px; overflow-x: auto; }
+.settings-data-table { min-width: 980px; }
+.settings-data-table td { vertical-align: middle; }
+.settings-data-table .row-actions { min-width: 126px; }
+
+.minimum-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.minimum-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+.minimum-card > div:first-child { display: grid; gap: 3px; }
+.minimum-card span { color: var(--ink); font-size: 11px; font-weight: 900; }
+.minimum-card small { color: #74809f; font-size: 9px; }
+.minimum-card > strong { color: var(--blue); font-size: 18px; }
+.minimum-card .row-actions { grid-column: 1 / -1; justify-content: flex-start; }
+
 .login-page {
   min-height: 100vh;
   display: grid;
@@ -2295,6 +2466,8 @@ input {
   .region-atlas { grid-template-columns: 1fr; }
   .region-rank-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .region-table { grid-column: 1 / -1; max-height: 260px; }
+  .user-create-form { grid-template-columns: repeat(3, minmax(140px, 1fr)); }
+  .minimum-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 840px) {
@@ -2337,4 +2510,17 @@ input {
   .region-pin { transform-box: fill-box; }
   .pin-name { font-size: 9px; }
   .drawer-tab { top: 96px; }
+  .settings-tabs { display: flex; }
+  .settings-tabs button { flex: 1; justify-content: center; }
+  .user-create-form,
+  .plan-form,
+  .minimum-form,
+  .password-panel,
+  .admin-user-row,
+  .minimum-grid { grid-template-columns: 1fr; }
+  .password-panel form { flex-wrap: wrap; }
+  .password-panel input { min-width: 100%; }
+  .role-badge,
+  .status-badge { justify-self: start; }
+  .admin-user-row .row-actions { justify-content: flex-start; }
 }
